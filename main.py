@@ -1,6 +1,6 @@
 import pygame
-import sockets
-
+import socket
+import card
 pygame.init()
 
 # Set up the display
