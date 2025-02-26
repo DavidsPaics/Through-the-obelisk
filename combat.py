@@ -30,6 +30,7 @@ def combat(surface):
                 combat_menu_is_running=False
         surface.fill((0,0,0))
         _board.update()
-        _board.draw(screen,dt)
+        _board.draw(dt)
+        surface.blit(pygame.transform.scale(_board.surface,(screen_width,screen_height)),(0,0))
         pygame.display.update()
-combat(screen)
+#combat(screen)

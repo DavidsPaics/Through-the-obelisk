@@ -1,0 +1,13 @@
+{
+    "Health":90,
+    "Animations":[
+        {
+            "Sprite Path":"",
+            "X Center":0,
+            "Y Center":0,
+            "X Movement":0,
+            "Y Movement":0
+            
+        }
+    ]
+}

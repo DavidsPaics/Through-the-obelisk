@@ -1,4 +1,5 @@
 from card import *
+import creature
 import spell
 import sys
 import os
@@ -8,7 +9,7 @@ class Board:
             "Board":[]
         }
         self.card_piles=[]
-        #self.surface=pygame.Surface((1920,1080))
+        self.surface=pygame.Surface((1920,1080))
         self.camera_x=0
         self.camera_y=0 #Puts the camera about right
 
@@ -46,7 +47,7 @@ class Board:
             "Cards":[]
         }
         self.card_piles.append(card_pile_name)
-    def draw(self,surface,delta=1):
+    def draw(self,delta=1):
         #self.camera_x*=1.01
         #self.camera_y*=1.01
         self.frame+=1
@@ -63,7 +64,7 @@ class Board:
             cards_in_pile=len(selected_card_pile["Cards"])
             if cards_in_pile>0:
                 selected_card_pile["Cards"][-1].draw()
-                center(selected_card_pile["Cards"][-1].sprite,surface,selected_card_pile["Position"][0]-self.camera_x,selected_card_pile["Position"][1]-self.camera_y)                
+                center(selected_card_pile["Cards"][-1].sprite,self.surface,selected_card_pile["Position"][0]-self.camera_x,selected_card_pile["Position"][1]-self.camera_y)                
         if "Hand" in self.locations:
            # self.locations["Hand"]["Position"]=[self.camera_x+surface.get_width()/2,self.camera_y+surface.get_height()/2+500]
             self.cards_in_hand=len(self.locations["Hand"]["Cards"])
@@ -83,7 +84,7 @@ class Board:
                         iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
                         #print(iterated_card.sprite)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            surface,iterated_card.vector_space_element.x-self.camera_x,
+                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
                         #center(render_text((round(iterated_card.vector_space_element.x),round(iterated_card.vector_space_element.y)),30,(255,0,0)),self.surface,iterated_card.vector_space_element.x-self.camera_x,iterated_card.vector_space_element.y-self.camera_y)
                         #The line above is used in debug to determine card positions
@@ -110,11 +111,11 @@ class Board:
                     if iterated_card!=self.locations["Hand"]["Selected Card"]:
                         iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            surface,iterated_card.vector_space_element.x-self.camera_x,
+                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
                     else:
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            surface,iterated_card.vector_space_element.x-self.camera_x,
+                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
                     
                     #center(render_text((round(iterated_card.vector_space_element.x),round(iterated_card.vector_space_element.y)),30,(255,0,0)),self.surface,iterated_card.vector_space_element.x-self.camera_x,iterated_card.vector_space_element.y-self.camera_y)
@@ -166,12 +167,12 @@ class Board:
                 if interacted_card.parent.attack>0:             possible_actions.append("Attack")
                 for I,i in enumerate(possible_actions):
                     action_center_x=960-((len(possible_actions)-1)/2-I)*200
-                    pygame.draw.rect(surface,(15,15,15),(action_center_x-80,820,160,60),0,10)
-                    center(render_text(i,20,(255,255,255)),surface,action_center_x,850)
+                    pygame.draw.rect(self.surface,(15,15,15),(action_center_x-80,820,160,60),0,10)
+                    center(render_text(i,20,(255,255,255)),self.surface,action_center_x,850)
                     if not (abs(self.r_mouse_pos[0]-action_center_x)<80 and abs(self.r_mouse_pos[1]-835)<30): #If The mouse hovers over this button
-                        pygame.draw.rect(surface,(125,125,125),(action_center_x-80,820,160,60),5,10)
+                        pygame.draw.rect(self.surface,(125,125,125),(action_center_x-80,820,160,60),5,10)
                     else:
-                        pygame.draw.rect(surface,(175,175,125),(action_center_x-80,820,160,60),5,10) #It Gets a different color
+                        pygame.draw.rect(self.surface,(175,175,125),(action_center_x-80,820,160,60),5,10) #It Gets a different color
                         if self.click[0]:
                             if i=="Close":
                                 del self.open_GUIs["Interacting With Card On Field"]
@@ -187,7 +188,7 @@ class Board:
                 for i in move_to_squares:
                     for ii in self.locations["Board"]:
                         if ii["Tags"]["Position"]["X"]+i[0]==interacted_card.space["Tags"]["Position"]["X"] and ii["Tags"]["Position"]["Y"]-i[1]==interacted_card.space["Tags"]["Position"]["Y"]:
-                            pygame.draw.circle(surface,(255,255,126),(interacted_card.space["X Offset"]-self.camera_x,interacted_card.space["Y Offset"]-self.camera_y),15)
+                            pygame.draw.circle(self.surface,(255,255,126),(interacted_card.space["X Offset"]-self.camera_x,interacted_card.space["Y Offset"]-self.camera_y),15)
                 if self.click[0] and not clicktaken:
                     del self.open_GUIs["Interacting With Card On Field"]
             #Chess Piece Ends Here. 
@@ -205,7 +206,13 @@ class Board:
     def add_card_to_game(self,plain_card,plain_card_type="Creature"): #Adds a new card to the game, returns the created card
         new_card=Card() 
         if plain_card_type=="Spell":
-            new_object_manager=spell.spell(plain_card)
+            new_object_manager=spell.Spell(plain_card)
+            new_object_manager.card=new_card
+            new_object_manager.draw() #Draws the new card at the start, so it is visible at all
+            new_card.parent=new_object_manager #Also attributes the parent to whatever is locked inside the card
+            return new_object_manager.card
+        if plain_card_type=="Creature":
+            new_object_manager=creature.Creature(plain_card)
             new_object_manager.card=new_card
             new_object_manager.draw() #Draws the new card at the start, so it is visible at all
             new_card.parent=new_object_manager #Also attributes the parent to whatever is locked inside the card
