@@ -2,6 +2,7 @@ from random import *
 from math import *
 import pygame
 def center(sprite,surface,x,y): #Centers a sprite on specific coordinates
+   # print(sprite.get_width(),x)
     surface.blit(sprite,(x-sprite.get_width()/2,y-sprite.get_height()/2))
 fonts={}
 texts={}

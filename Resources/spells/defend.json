@@ -1,0 +1,14 @@
+{
+    "Type":"Attack",
+    "Target":"Single Friendly",
+    "Energy Cost":1,
+    "Effects":{
+        "On Play":[
+            {
+                "Type":"Give Block",
+                "Special Target":"Main",
+                "Block":5
+            }
+        ]
+    }
+}

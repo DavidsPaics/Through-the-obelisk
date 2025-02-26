@@ -63,14 +63,15 @@ class Board:
             cards_in_pile=len(selected_card_pile["Cards"])
             if cards_in_pile>0:
                 selected_card_pile["Cards"][-1].draw()
-                center(selected_card_pile["Cards"][-1].sprite,self.surface,selected_card_pile["Position"][0]-self.camera_x,selected_card_pile["Position"][1]-self.camera_y)                
+                center(selected_card_pile["Cards"][-1].sprite,surface,selected_card_pile["Position"][0]-self.camera_x,selected_card_pile["Position"][1]-self.camera_y)                
         if "Hand" in self.locations:
-            self.locations["Hand"]["Position"]=[self.camera_x+960,self.camera_y+540+500]
+           # self.locations["Hand"]["Position"]=[self.camera_x+surface.get_width()/2,self.camera_y+surface.get_height()/2+500]
             self.cards_in_hand=len(self.locations["Hand"]["Cards"])
             if self.cards_in_hand>0:
                 curvature_settings=self.locations["Hand"]["Curvature Settings"]
                 card_distance_from_mouse={}
                 for I,iterated_card in enumerate(self.locations["Hand"]["Cards"]):
+                    #print(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
                     if not iterated_card in [self.locations["Hand"]["Selected Card"],self.locations["Hand"]["Card Rendered On Top"]]:
                         central_offset=-(self.cards_in_hand-1)/2+I #Used to calculate rotation
                         iterated_card.draw(delta=delta)
@@ -79,7 +80,8 @@ class Board:
                         rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
                         if not iterated_card.vector_space_element.set_up:
                             iterated_card.vector_space_element.setup(destination_x,destination_y)
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,20,rotation)
+                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
+                        #print(iterated_card.sprite)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
                             surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
@@ -106,7 +108,7 @@ class Board:
                     if not iterated_card.vector_space_element.set_up:
                         iterated_card.vector_space_element.setup(destination_x,destination_y)
                     if iterated_card!=self.locations["Hand"]["Selected Card"]:
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,20,rotation)
+                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
                             surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
@@ -262,183 +264,9 @@ class Board:
 
         #print(possible_cards)
         return possible_cards
-    def check_bboard_events(self):
-        global expansions
-        if self.combo_timer==0:
-            self.combo_score=0
-        else:
-            self.combo_timer-=1
-        collumns_filled=[]
-        for i in range(8): #checks all the columns,and if any are filled, they are cleared
-            is_all_filled=True
-            for ii in range(8):
-                t_square=self.locations["BBoard"]["Map"][i][ii]
-                if t_square["Square"].filled==False:
-                    is_all_filled=False
-                    break
-            
-            if is_all_filled:
-                collumns_filled.append(i)
-                self.combo_timer=3
-                self.combo_score+=1
-                self.score+=10*self.combo_score
-        for ii in range(8): #checks all the rows,and if any are filled, they are cleared
-            is_all_filled=True
-            for i in range(8):
-                t_square=self.locations["BBoard"]["Map"][i][ii]
-                if t_square["Square"].filled==False:
-                    is_all_filled=False
-                    break
-            if is_all_filled:
-                for i in range(8):
-                    t_square=self.locations["BBoard"]["Map"][i][ii]
-                    t_square["Square"].on_destroyed(t_square)
-                self.combo_score+=1
-                self.score+=10*self.combo_score
-                self.combo_timer=3
-        for i in collumns_filled:
-            for ii in range(8):
-                t_square=self.locations["BBoard"]["Map"][i][ii]
-                t_square["Square"].on_destroyed(t_square)
-       
-            
-        if len(self.locations["Hand"]["Cards"])==0:
-            for i in range(3):
-                self.draw_a_card()
-                if len(self.locations["Deck"]["Cards"])==0:
-                    for ii in self.locations["Graveyard"]["Cards"]:
-                        self.locations["Deck"]["Cards"].append(ii) #Should Mutate the cards here
-                        ii.iflip("Back")
-                    self.mutate_cards()
-                    self.are_cards_mutated=False
-                        
-                        #ii.parent.mutate()
-                    self.locations["Graveyard"]["Cards"]=[]
-                    self.tech["Choice Of Expansions"]=[]
-                    shuffle(expansions)
-                    if len(expansions)>2:
-                        for i in range(3):
-                            self.tech["Choice Of Expansions"].append(expansions.pop())
-                    expansions+=self.tech["Choice Of Expansions"]
-                    self.camera_y=-1529
-                    self.camera_x=-537
-        self.possible_moves_checked_this_turn=False
-        self.total_moves=0
-        self.score=min(self.score,(len(self.tech["Expansions"])+1)**2*500)
-        self.possible_moves=0
-        self.game_over=self.score>0
-        for iterated_card in self.locations["Deck"]["Cards"]+self.locations["Hand"]["Cards"]+self.locations["Graveyard"]["Cards"]:
-            if iterated_card.parent.type=="Piece":
-                iterated_card.parent.possible_moves=[]
-                iterated_card.parent.total_moves=[]
-        crystal_options=set()
-        for x in range(8):
-            for y in range(8):
+    
 
-                current_square=self.locations["BBoard"]["Map"][x][y]["Square"]
-                if current_square.type in ["Kinematic Up","Kinematic Down","Kinematic Left","Kinematic Right"]:
-                    current_square.moved_this_turn=False
-                #Does all the expansion effects here
-                current_square=self.locations["BBoard"]["Map"][x][y]["Square"]
-                
-                current_square.update(self.locations["BBoard"]["Map"],(x,y))
-                if current_square.type=="Empty" and self.score>=100: #Begins Crystal Generation
-                    current_square.has_crystal=-1
-                    crystal_options.add((x,y))
-                
-                #handles Thermodynamics
-                if "Cooling" in self.tech["Expansion Flags"]:
-                    if current_square.filled:
-                        if current_square.temperature<0:
-                            current_square.temperature-=int((y+7-x)/14*random()*50)
-                        current_square.temperature=max(-273,current_square.temperature) #Sets a lower boundary
-                        if x>0: #Spreads the tempature to the x before
-                            if self.locations["BBoard"]["Map"][x-1][y]["Square"].filled: #Can only transfer to solid blocks
-                                temperature_alpha=current_square.temperature
-                                temperature_beta=self.locations["BBoard"]["Map"][x-1][y]["Square"].temperature
-                                transfered_alpha=temperature_alpha/5
-                                transfered_beta=temperature_beta/5
-                                current_square.temperature+=int(transfered_beta-transfered_alpha)
-                                self.locations["BBoard"]["Map"][x-1][y]["Square"].temperature+=int(transfered_alpha-transfered_beta)
-                                #if temperature_alpha>0 or temperature_beta>0:
-                                    #print("Type A")
-                                    #print(transfered_alpha,transfered_beta,temperature_alpha,temperature_beta)
-                                    #print(x,y)
-                                    #print()
-                        if y>0:
-                            if self.locations["BBoard"]["Map"][x][y-1]["Square"].filled:
-                                temperature_alpha=current_square.temperature
-                                temperature_beta=self.locations["BBoard"]["Map"][x][y-1]["Square"].temperature
-                                transfered_alpha=temperature_alpha/5
-                                transfered_beta=temperature_beta/5
-                                current_square.temperature+=int(transfered_beta-transfered_alpha)
-                                self.locations["BBoard"]["Map"][x][y-1]["Square"].temperature+=int(transfered_alpha-transfered_beta)
-                                #if temperature_alpha>0 or temperature_beta>0:
-                                    #print("Type B")
-                                    #print(transfered_alpha,transfered_beta,temperature_alpha,temperature_beta)
-                                    #print(x,y)
-                                    #print()
-                current_square.draw()
-        self.check_possible_moves()
-        crystal_options=list(crystal_options)
-        for i in range(self.tech["Crystal Spawns"]):
-            if len(crystal_options)>0:
-                crystal_position=crystal_options.pop(randint(0,len(crystal_options)-1))
-                self.locations["BBoard"]["Map"][crystal_position[0]][crystal_position[1]]["Square"].has_crystal=randint(0,3)
-        #Ends the game if no possible moves are left
-        for i in self.locations["Hand"]["Cards"]:
-            if i.parent.type=="Piece":
-                if len(i.parent.possible_moves)>0:
-                    #for ii in i.parent.possible_moves: #left here for testing purpouses, just in case
-                    #print(ii)
-                    self.game_over=False
-                #print()
-            else:
-                self.game_over=False
-    def check_possible_moves(self):
-        if not self.possible_moves_checked_this_turn:
-            self.possible_moves_checked_this_turn=True
-            for x in range(8):
-                for y in range(8): #Checks all of the cards in the deck, and checks if they can be placed
-                    for iterated_card in self.locations["Deck"]["Cards"]+self.locations["Hand"]["Cards"]+self.locations["Graveyard"]["Cards"]:
-                        if iterated_card.parent.type=="Piece":
-                            can_be_placed=True
-                            for iterated_square in iterated_card.parent.squares:
-                                if can_be_placed:
-                                    if 0<=iterated_square[0]+y<=7 and 0<=iterated_square[1]+x<=7: #Fits on the board
-                                        if not iterated_card.parent.squares[iterated_square].check_compatibility(self.locations["BBoard"]["Map"][iterated_square[0]+y][iterated_square[1]+x]["Square"]):
-                                            can_be_placed=False
-                                    else:
-                                        can_be_placed=False
-                            if can_be_placed:
-                                iterated_card.parent.possible_moves.append((y,x))
-                                self.possible_moves+=1
-                            self.total_moves+=1
-                            iterated_card.parent.total_moves.append((y,x))
-        #print("--d--")
-    def mutate_cards(self):
-
-        if not self.are_cards_mutated:
-            if len(self.tech["Mutations"])>0:
-                for ii in self.locations["Deck"]["Cards"]+self.locations["Hand"]["Cards"]+self.locations["Graveyard"]["Cards"]:
-                    if ii.parent.type=="Piece":
-                        mutation_times=int(log(random(),self.tech["Mutation Factor"]))
-                        #print(mutation_times)
-                        for i in range(mutation_times):
-                            choices(self.tech["Mutations"],[iii["Weight"] for iii in self.tech["Mutations"]])[0]["Function"](ii.parent)
-                        ii.parent.mutate_pack()
-        self.are_cards_mutated=True
-    def refresh_shop(self):
-        #Shop always has 5 random items in it, if possible. after an item is bought, the items in the shop are refreshed
-        
-        self.tech["Shop Items"]+=self.tech["Shop Stock"]
-        self.tech["Shop Stock"]=[]
-        for i in range(5):
-            if len(self.tech["Shop Items"])>0:
-                self.tech["Shop Stock"].append(self.tech["Shop Items"].pop())
-
-
-    #Effect Building Starts Here
+       #Effect Building Starts Here
     #Warning: No Return after this
 
     #You are now entering the wastelands

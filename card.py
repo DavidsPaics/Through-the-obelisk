@@ -1,6 +1,7 @@
 from random import *
 from math import *
 import pygame
+import colorsys
 from useful_stuff import *
 pygame.init()
 
@@ -24,7 +25,7 @@ class Card:
             "Side On Top":"Front",
             "Type":"None"
         }
-        #self.vector_space_element=Vector_Element()
+        self.vector_space_element=Vector_Element()
     def flip(self,frames=1,flip_to_side=None,flip_vertically=False):
         for i in self.animations:
             if i["Type"]=="Flipping":
@@ -54,7 +55,7 @@ class Card:
                         self.sprite.blit(pygame.transform.scale(self.sides[self.data["Side On Top"]],(210,320*size_q)),(0,160*(1-size_q)))
                     else:
                         self.sprite.blit(pygame.transform.scale(self.sides[self.data["Side On Top"]],(210*size_q,320)),(105*(1-size_q),0))
-                else:
+                elif i["Frames Left"]>=0:
                     size_q=sin((1-i["Frames Left"]/i["Max Frames"]*2)*pi/2) #Just spins the card more accuratelly, assuming it is spinning in a 3d space. (yes i made the equation up, i have no clue what it should look like)
                     if i["Custom Flip Side"]==None:
                         next_side_flipped=(self.data["Current Side Flipped"]+1)%len(self.data["Side Order In Flipping"]) #Takes the next side on order, looping around to the start if neccessary
@@ -80,5 +81,12 @@ class Card:
         
     def side_from_surface(self,surface,side="Front"): #Allows you to set custom images as sides of the card.
         self.sides[side]=surface.subsurface((0,0,210,320)).copy() #Crops to the top left corner
+        self.sides[side].fill([i*255 for i in colorsys.hsv_to_rgb(random(),1,1)])
         self.sides[side].blit(card_transparency_overlay,(0,0)) #Creates several
         self.sides[side].set_colorkey(card_transparency_color)
+    def iflip(self,flip_to_side=None): #Flips Instantly
+        if flip_to_side==None:
+            flip_to_side="Front"
+        self.data["Side On Top"]=flip_to_side
+    def clear_animations(self):
+        self.animations=[]

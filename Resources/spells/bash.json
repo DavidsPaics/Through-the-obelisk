@@ -1,12 +1,12 @@
 {
     "Type":"Attack",
     "Target":"Single",
-    "Energy Cost":1,
+    "Energy Cost":2,
     "Effects":{
         "On Play":[
             {
                 "Type":"Deal Damage",
-                "Damage":6
+                "Damage":8
             }
         ]
     }
