@@ -5,7 +5,7 @@ from mainMenu import mainMenu
 pygame.init()
 
 # Set up the display
-screen = pygame.display.set_mode((0, 0))
+screen = pygame.display.set_mode((1080 , 720))
 pygame.display.set_caption("Through the Obelisk")
 
 logging.basicConfig(level=logging.INFO, 
@@ -16,13 +16,6 @@ logging.basicConfig(level=logging.INFO,
                     ])
 logging.info('Sveiki!')
 
-# networking = Networking(bool(input("Server? (y/n): ") == "y"), port=6969, ip="localhost")
-
-# while not networking.isConnected and networking.isServer:
-#     networking.try_accept_connection()
-#     time.sleep(0.1)
-
-# logging.info("Connected!")
 
 # Main game loop
 running = True
@@ -35,13 +28,6 @@ while running:
             running = False
 
     screen.fill((0, 0, 0))
-
-    # if networking.isServer:
-    #     data = networking.receive()
-    #     if data is not None:
-    #         logging.info(f"Received data: {data}")
-    # else:
-    #     pass
 
     mainMenu(screen)
 
