@@ -16,6 +16,7 @@ def mainMenu(screen):
     host_button_text = useful_stuff.render_text("Host Game", 22, (255, 255, 255), "arial")
     join_button_rect = pygame.Rect((screen_width - 200) // 2, 320, 200, 50)
     join_button_text = useful_stuff.render_text("Join Game", 22, (255, 255, 255), "arial")
+    game_title = useful_stuff.render_text("Through the Obelisk", 50, (255, 255, 255), "arial", bold=True)
 
     
     while True:
@@ -51,6 +52,8 @@ def mainMenu(screen):
         else:
             pygame.draw.rect(screen, (139, 0, 0), join_button_rect, border_radius=5)
         screen.blit(join_button_text, (join_button_rect.x + 50, join_button_rect.y + 11))
+
+        screen.blit(game_title, (screen_width // 2 - 220, 100))
         
         if globalState.debugMode:
             useful_stuff.draw_fps_counter(screen, globalState.clock)

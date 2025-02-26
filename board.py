@@ -2,7 +2,17 @@ from card import *
 import creature
 import spell
 import sys
+import logging
 import os
+
+cardSideImages={}
+
+def loadCardImages(path="./Resources/images/cards/"): # must have slash at the end
+    for name in os.listdir(path):
+        with open(os.path.join(path, name)) as f:
+            logging.debug(f"loaded {name}")
+            cardSideImages[''.join(name.split(".")[:-1])] = pygame.transform.scale(pygame.image.load(path + name), (210, 320))
+
 class Board:
     def __init__(self,inherited_screen_size=(1920,1080)):
         self.locations={  #Contains all the data about where cards can exist
@@ -22,6 +32,8 @@ class Board:
         self.click=[False,False,False] #Can accurately detect the first frame when the mouse button is clicked
         self.game_over=False
         self.open_GUIs={}
+
+        loadCardImages()
 
         self.frame=0
         self.tech={} #Current Effects happening on board
@@ -52,7 +64,7 @@ class Board:
         #self.camera_y*=1.01
         self.frame+=1
         self.drag_screen_allowed=False
-        #self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
+        self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         #Draws the board at the very bottom
           
         
@@ -203,20 +215,31 @@ class Board:
             self.camera_y-=self.mouse_rel[1]
         self.ctimer=[(self.ctimer[i]+1)*self.mouse_down[i] for i in range(3)]
         self.click=[self.ctimer[i]==1 for i in range(3)]
-    def add_card_to_game(self,plain_card,plain_card_type="Creature"): #Adds a new card to the game, returns the created card
+    def add_card_to_game(self,plain_card_id,plain_card_type="Creature"): #Adds a new card to the game, returns the created card
         new_card=Card() 
+
         if plain_card_type=="Spell":
-            new_object_manager=spell.Spell(plain_card)
+            new_object_manager=spell.Spell(plain_card_id)
             new_object_manager.card=new_card
             new_object_manager.draw() #Draws the new card at the start, so it is visible at all
             new_card.parent=new_object_manager #Also attributes the parent to whatever is locked inside the card
-            return new_object_manager.card
-        if plain_card_type=="Creature":
-            new_object_manager=creature.Creature(plain_card)
+        elif plain_card_type=="Creature":
+            new_object_manager=creature.Creature(plain_card_id)
             new_object_manager.card=new_card
             new_object_manager.draw() #Draws the new card at the start, so it is visible at all
             new_card.parent=new_object_manager #Also attributes the parent to whatever is locked inside the card
-            return new_object_manager.card
+        
+        if plain_card_id + "-front" in cardSideImages:
+            new_object_manager.card.side_from_surface(cardSideImages[plain_card_id + "-front"], "Front")
+        else:
+            new_object_manager.card.side_from_surface(cardSideImages["default-front"], "Front")
+
+        if plain_card_id + "-back" in cardSideImages:
+             new_object_manager.card.side_from_surface(cardSideImages[plain_card_id + "-back"], "Back")
+        else:
+            new_object_manager.card.side_from_surface(cardSideImages["default-back"], "Back")
+
+        return new_object_manager.card
         
 
     def draw_a_card(self,from_pile="Deck"): #Takes a card from a deck, adds it to the hand, the animation engine itself figures out how to animate that
