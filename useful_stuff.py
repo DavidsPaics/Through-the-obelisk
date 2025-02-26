@@ -5,6 +5,10 @@ def center(sprite,surface,x,y): #Centers a sprite on specific coordinates
     surface.blit(sprite,(x-sprite.get_width()/2,y-sprite.get_height()/2))
 fonts={}
 texts={}
+def draw_fps_counter(screen,clock,font="comicsansms",size=20,color=(255,255,255),bold=False,italic=False): #Draws the fps counter
+    fps=round(clock.get_fps())
+    screen.blit(render_text("FPS: "+str(fps),size=size,color=color,font=font,bold=bold,italic=italic),(0,0))
+
 def render_text(text="TEXT NOT PROVIDED",size=20,color=(255,255,255),font="comicsansms",bold=False,italic=False): #allows you to render text fast
     font_key=str(font)+str(size)
     text_key=str(font_key)+str(text)+str(color)

@@ -1,10 +1,11 @@
 import pygame, logging, time
 from networking import Networking
+import globalState
 from mainMenu import mainMenu
 pygame.init()
 
 # Set up the display
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0, 0))
 pygame.display.set_caption("Through the Obelisk")
 
 logging.basicConfig(level=logging.INFO, 
@@ -25,9 +26,9 @@ logging.info('Sveiki!')
 
 # Main game loop
 running = True
-clock = pygame.time.Clock()
+globalState.clock = pygame.time.Clock()
 while running:
-    dt = clock.tick(60) # ms
+    dt = globalState.clock.tick(60) # ms
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
