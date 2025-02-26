@@ -2,12 +2,14 @@
     "Health":90,
     "Animations":[
         {
-            "Sprite Path":"",
+            "Sprite Path":"Resources/creatures/players/sprites/warrior",
             "X Center":0,
             "Y Center":0,
             "X Movement":0,
-            "Y Movement":0
-            
+            "Y Movement":15,
+            "Fi":0,
+            "Omega":0.2,
+            "Side":"Front"
         }
     ]
 }

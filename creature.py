@@ -16,8 +16,29 @@ class Creature:
         self.max_hp=self.data["Health"]
         self.hp=self.max_hp
         self.card=None
-    def draw(self):
+        self.sprite=[]
+        for i in self.data["Animations"]:
+            if not i["Sprite Path"] in cached_sprite_pictures:
+                cached_sprite_pictures[i["Sprite Path"]]=pygame.image.load(i["Sprite Path"])
+            self.sprite.append(i.copy())
+        
+    def draw(self,delta):
         if self.card!=None:
+            #Currently only front is functional
             self.card.sides["Front"].fill((12,23,34))
-            center(self.sprite,self.card.sides["Front"],105,160)
-    
+            for i in self.sprite:
+                x_position=i["X Center"]+105
+                y_position=i["Y Center"]+160
+                if "Fi" in self.sprite:
+                    i["Fi"]+=i["Omega"]/delta
+                    x_position+=cos(i["Fi"])*i["X Movement"]
+                    y_position+=sin(i["Fi"])*i["Y Movement"]
+                if "X Fi" in self.sprite:
+                    i["X Fi"]+=i["Omega"]/delta
+                    x_position+=cos(i["Fi"])*i["X Movement"]
+                if "Y Fi" in self.sprite:
+                    i["Y Fi"]+=i["Omega"]/delta
+                    y_position+=sin(i["Y Fi"])*i["Y Movement"]
+                if self.card.sides[self.card.data["Side On Top"]]==i["Side"]:
+                    center(cached_sprite_pictures[i["Sprite Path"]],self.card.sides[i["Side"]],x_position,y_position)
+           
