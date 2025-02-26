@@ -13,6 +13,7 @@ def combat(surface):
     screen_height = surface.get_height()
     _board=board.Board()
     _board.setup_card_pile("Deck",(screen_width,screen_height))
+    _board.setup_card_pile("Graveyard",(0,screen_height))
     _board.setup_hand()
     _board.locations["Hand"]["Position"]=[screen_width/2,screen_height*5/6]
     _board.import_deck(default_deck_1)
