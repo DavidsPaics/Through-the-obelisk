@@ -8,7 +8,7 @@ for root, dirs, files in os.walk(r"Resources/creatures/"):
         if file.endswith(".json"):
             with open(os.path.join(root,file),"r") as f:
                 creature_data[file[:-5]]=json.loads(f.read())
-cached_sprite_pictures
+cached_sprite_pictures={}
 class Creature:
     def __init__(self,_id):
         self.id=_id
