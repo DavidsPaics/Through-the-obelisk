@@ -1,0 +1,12 @@
+{
+    "Type":"Attack",
+    "Target":"Single",
+    "Effects":{
+        "On Play":[
+            {
+                "Type":"Deal Damage",
+                "Damage":6
+            }
+        ]
+    }
+}

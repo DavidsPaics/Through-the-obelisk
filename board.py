@@ -9,8 +9,8 @@ class Board:
         }
         self.card_piles=[]
         #self.surface=pygame.Surface((1920,1080))
-        self.camera_x=-537
-        self.camera_y=-177 #Puts the camera about right
+        self.camera_x=0
+        self.camera_y=0 #Puts the camera about right
 
         self.mouse_pos=[0,0] #Set to this for now, as it causes a crash if unset
         self.r_mouse_pos=[0,0]
@@ -46,13 +46,11 @@ class Board:
             "Cards":[]
         }
         self.card_piles.append(card_pile_name)
-    def draw(self,surface,delta):
+    def draw(self,surface,delta=1):
         #self.camera_x*=1.01
         #self.camera_y*=1.01
         self.frame+=1
-        if abs(int(self.display_score)-self.score)>0.5:
-            self.display_score+=(2*int(self.display_score<self.score))-1
-        self.drag_screen_allowed=True
+        self.drag_screen_allowed=False
         #self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         #Draws the board at the very bottom
           
@@ -75,7 +73,7 @@ class Board:
                 for I,iterated_card in enumerate(self.locations["Hand"]["Cards"]):
                     if not iterated_card in [self.locations["Hand"]["Selected Card"],self.locations["Hand"]["Card Rendered On Top"]]:
                         central_offset=-(self.cards_in_hand-1)/2+I #Used to calculate rotation
-                        iterated_card.draw()
+                        iterated_card.draw(delta=delta)
                         destination_x=self.locations["Hand"]["Position"][0]-((self.cards_in_hand-1)/2-I)*170 #Determines card position in hand
                         destination_y=self.locations["Hand"]["Position"][1]+abs(central_offset)**curvature_settings["Beta"]*curvature_settings["Gamma"] #This is where the schizophrenia starts. I'll forget how this works once i look away, so i must not look away.
                         rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
@@ -235,7 +233,7 @@ class Board:
         if not to_card_pile in self.locations:
             self.setup_card_pile(to_card_pile)
         for iterated_card_packed in json_deck_list:
-            new_card=self.add_card_to_game(iterated_card_packed["Name"],iterated_card_packed["Type"])
+            new_card=self.add_card_to_game(iterated_card_packed["ID"],iterated_card_packed["Type"])
             new_card.iflip("Back")
             self.locations[to_card_pile]["Cards"].append(new_card)
     def shuffle_card_pile(self,card_pile="Deck"):

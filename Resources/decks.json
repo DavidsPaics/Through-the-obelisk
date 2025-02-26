@@ -1,0 +1,39 @@
+{
+    "Warrior":[
+        {
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"strike"
+        },{
+            "Type":"Spell",
+            "ID":"defend"
+        },{
+            "Type":"Spell",
+            "ID":"defend"
+        },{
+            "Type":"Spell",
+            "ID":"defend"
+        },{
+            "Type":"Spell",
+            "ID":"defend"
+        },{
+            "Type":"Spell",
+            "ID":"bash"
+        }
+        
+    ]
+}
