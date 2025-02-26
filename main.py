@@ -1,5 +1,6 @@
 import pygame, logging, time
 from networking import Networking
+from mainMenu import mainMenu
 pygame.init()
 
 # Set up the display
@@ -14,31 +15,36 @@ logging.basicConfig(level=logging.INFO,
                     ])
 logging.info('Sveiki!')
 
-networking = Networking(bool(input("Server? (y/n): ") == "y"), port=6969, ip="localhost")
+# networking = Networking(bool(input("Server? (y/n): ") == "y"), port=6969, ip="localhost")
 
-while not networking.isConnected and networking.isServer:
-    networking.try_accept_connection()
-    time.sleep(0.1)
+# while not networking.isConnected and networking.isServer:
+#     networking.try_accept_connection()
+#     time.sleep(0.1)
 
-logging.info("Connected!")
+# logging.info("Connected!")
 
 # Main game loop
 running = True
+clock = pygame.time.Clock()
 while running:
+    dt = clock.tick(60) # ms
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # Fill the screen with a color (e.g., white)
-    screen.fill((255, 255, 255))
+    screen.fill((0, 0, 0))
 
-    if networking.isServer:
-        data = networking.receive()
-        if data is not None:
-            logging.info(f"Received data: {data}")
-    else:
-        pass
-    # Update the display
-    pygame.display.flip()
+    # if networking.isServer:
+    #     data = networking.receive()
+    #     if data is not None:
+    #         logging.info(f"Received data: {data}")
+    # else:
+    #     pass
+
+    mainMenu(screen)
+
+
+    pygame.display.update()
 
 pygame.quit()
