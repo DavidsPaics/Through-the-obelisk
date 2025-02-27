@@ -20,8 +20,7 @@ def combat(surface):
     
     for i in range(5):
         _board.draw_a_card()
-    _board.locations["Hand"]["Cards"][0].sides["Front"].blit(pygame.image.load("./Resources/images/not-stolen-background.png"),(0,0))
-    
+        
     clock=pygame.time.Clock()
     while combat_menu_is_running:
         
