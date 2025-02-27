@@ -5,18 +5,11 @@ import sys
 import logging
 import os
 
-cardSideImages={}
-
-def loadCardImages(path="./Resources/images/cards/"): # must have slash at the end
-    for name in os.listdir(path):
-        with open(os.path.join(path, name)) as f:
-            logging.debug(f"loaded {name}")
-            cardSideImages[''.join(name.split(".")[:-1])] = pygame.transform.scale(pygame.image.load(path + name), (210, 320))
-
 class Board:
     def __init__(self,inherited_screen_size=(1920,1080)):
         self.locations={  #Contains all the data about where cards can exist
-            "Board":[]
+            "Board":[],
+            "OnTable":[]
         }
         self.card_piles=[]
         self.surface=pygame.Surface((1920,1080))
@@ -66,7 +59,9 @@ class Board:
         self.drag_screen_allowed=False
         self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         #Draws the board at the very bottom
-          
+        for i in self.locations["OnTable"]:
+            i["Card"].draw()
+            center(i["Card"].sprite,self.surface,i["Position"][0],i["Position"][1])
         pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,10)
              
         #Draws all the block positions and the blocks themselves

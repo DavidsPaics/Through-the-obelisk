@@ -22,7 +22,12 @@ def combat(surface):
     _board.setup_hand()
     _board.locations["Hand"]["Position"]=[960,900]
     _board.import_deck(default_deck_1)
-    
+    pcard_1=_board.add_card_to_game("Warrior","Creature")
+
+    _board.locations["OnTable"].append({
+        "Card":pcard_1,
+        "Position":[200,300]
+    })
     for i in range(5):
         _board.draw_a_card()
 
