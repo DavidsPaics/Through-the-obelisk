@@ -6,6 +6,7 @@ import random
 import math
 
 import globalState
+import useful_stuff
 
 with open("./Resources/decks.json","r") as read_file:
     default_deck_1=json.loads(read_file.read())["Warrior"]
@@ -45,10 +46,14 @@ def combat(surface):
                         _board.locations["Hand"]["Card Rendered On Top"].flip(50)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F7:
-                    combat_menu_is_running=False
+                    globalState.debugMode = not globalState.debugMode
+                
         _board.update()
         _board.draw(dt)
         surface.blit(pygame.transform.scale(_board.surface,(screen_width,screen_height)),(0,0))
+
+        if globalState.debugMode:
+            useful_stuff.draw_fps_counter(surface, globalState.clock)
         
         if globalState.networkManager:
             chat.draw(surface)
