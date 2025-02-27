@@ -50,7 +50,8 @@ class Card:
         })
     def draw(self,delta=1): #Updates the card sprite, it is recommended this is ran every frame
         if self.parent!=None: #Draws the cards parent first
-            self.parent.draw(delta)
+            if self.parent.type=="Creature":
+                self.parent.draw(delta)
         if self.vector_space_element.set_up:
             self.x=self.vector_space_element.x
             self.y=self.vector_space_element.y

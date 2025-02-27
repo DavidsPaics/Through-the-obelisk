@@ -34,9 +34,9 @@ def combat(surface):
     if globalState.networkManager != None:
         chat = Chat()
 
-    clock=pygame.time.Clock()
+    #clock=pygame.time.Clock()
     while combat_menu_is_running:
-        dt=clock.tick()
+        dt=globalState.clock.tick()
         if dt==0:
             dt=10
         dt=10/dt

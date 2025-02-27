@@ -35,7 +35,8 @@ class Vector_Element:
         self.rotation=rotation
         self.vectors=[]
         self.set_up=True
-    def move_with_easing_motion_to(self,destination_x,destination_y, easing_rate=20,destination_rotation=0): #Higher easing rate means slower easing
+    def move_with_easing_motion_to(self,destination_x,destination_y, easing_rate=20,destination_rotation=0,delta=1): #Higher easing rate means slower easing
+        easing_rate*=delta
         self.x=(self.x*(easing_rate-1)+destination_x)/easing_rate
         self.y=(self.y*(easing_rate-1)+destination_y)/easing_rate
         self.rotation=(self.rotation*(easing_rate-1)+destination_rotation)/easing_rate

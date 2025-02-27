@@ -60,7 +60,9 @@ class Board:
         self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         #Draws the board at the very bottom
         for i in self.locations["OnTable"]:
-            i["Card"].draw()
+            i["Card"].draw(delta=delta)
+            #logging.info(i)
+            #pygame.image.save(i["Card"].sprite,"test.png")
             center(i["Card"].sprite,self.surface,i["Position"][0],i["Position"][1])
         pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,10)
              
@@ -88,7 +90,7 @@ class Board:
                         rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
                         if not iterated_card.vector_space_element.set_up:
                             iterated_card.vector_space_element.setup(destination_x,destination_y)
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
+                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75,rotation,delta)
                         #print(iterated_card.sprite)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
                             self.surface,iterated_card.vector_space_element.x-self.camera_x,
@@ -108,7 +110,7 @@ class Board:
                     I=saved_I
                     iterated_card=self.locations["Hand"]["Card Rendered On Top"]
                     central_offset=-(self.cards_in_hand-1)/2+I
-                    iterated_card.draw()
+                    iterated_card.draw(delta=delta)
                     destination_x=self.locations["Hand"]["Position"][0]-((self.cards_in_hand-1)/2-I)*170 #Determines card position in hand
                     destination_y=self.locations["Hand"]["Position"][1]+abs(central_offset)**curvature_settings["Beta"]*curvature_settings["Gamma"] #This is where the schizophrenia starts. I'll forget how this works once i look away, so i must not look away.
                     rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
@@ -116,7 +118,7 @@ class Board:
                     if not iterated_card.vector_space_element.set_up:
                         iterated_card.vector_space_element.setup(destination_x,destination_y)
                     if iterated_card!=self.locations["Hand"]["Selected Card"]:
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75*delta,rotation)
+                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75,rotation,delta)
                         center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
                             self.surface,iterated_card.vector_space_element.x-self.camera_x,
                             iterated_card.vector_space_element.y-self.camera_y)
@@ -135,7 +137,7 @@ class Board:
                 if len(self.open_GUIs)==0: #If there are any other GUIs, cards cannot be interacted with
                     if self.locations["Hand"]["Selected Card"]!=None:
                         self.selected_card=self.locations["Hand"]["Selected Card"]
-                        self.selected_card.vector_space_element.move_with_easing_motion_to(self.mouse_pos[0],self.mouse_pos[1],4,0)
+                        self.selected_card.vector_space_element.move_with_easing_motion_to(self.mouse_pos[0],self.mouse_pos[1],4,0,delta)
                         
                         if self.selected_card.parent.type=="Spell": #Basically every single card in the game
                             if not self.mouse_down[0]:
@@ -157,15 +159,7 @@ class Board:
                             self.drag_screen_allowed=False
                         else:
                             self.locations["Hand"]["Card Rendered On Top"]=None
-        for iterated_card_space in self.locations["Board"]: #Made just now just to remember how stuff works, and to handle attacking.
-            if not "Interacting With Card On Field" in self.open_GUIs: #Can't open more than 1 GUI at the same time.
-                if "Interactable" in iterated_card_space["Tags"]:  #Checks if the card in this zone can attack
-                    if abs(iterated_card_space["X Offset"]-self.mouse_pos[0])<105 and abs(iterated_card_space["Y Offset"]-self.mouse_pos[1])<160: #Detects if the mouse is currently on the current card
-                        if iterated_card_space["Space"].card!=None: #Checks if a card exists in that space
-                            if self.click[0]:
-                                self.open_GUIs["Interacting With Card On Field"]={
-                                    "Selected Card":iterated_card_space["Space"].card
-                                }
+        
         if "Interacting With Card On Field" in self.open_GUIs:
             interacted_card=self.open_GUIs["Interacting With Card On Field"]["Selected Card"]
             if interacted_card.parent.type=="Creature":
@@ -183,22 +177,6 @@ class Board:
                         if self.click[0]:
                             if i=="Close":
                                 del self.open_GUIs["Interacting With Card On Field"]
-            #This should be deleted later, as it would be a rather little used feature. 
-            elif interacted_card.parent.type=="Chess Piece":
-                move_to_squares=[]
-                clicktaken=False
-                for i in interacted_card.parent.ruleset["Move"]:
-                    if i["Type"]=="Single Square":
-                        move_to_squares.append(i["Offset"])
-                        #pygame.draw.circle(self.surface,(255,255,126),(interacted_card.vector_space_element.x+220*i["Offset"][0]-self.camera_x,interacted_card.vector_space_element.y-220*i["Offset"][1]-self.camera_y-55),15,8)
-                    pass
-                for i in move_to_squares:
-                    for ii in self.locations["Board"]:
-                        if ii["Tags"]["Position"]["X"]+i[0]==interacted_card.space["Tags"]["Position"]["X"] and ii["Tags"]["Position"]["Y"]-i[1]==interacted_card.space["Tags"]["Position"]["Y"]:
-                            pygame.draw.circle(self.surface,(255,255,126),(interacted_card.space["X Offset"]-self.camera_x,interacted_card.space["Y Offset"]-self.camera_y),15)
-                if self.click[0] and not clicktaken:
-                    del self.open_GUIs["Interacting With Card On Field"]
-            #Chess Piece Ends Here. 
     def update(self): #Updates the board so that 
         self.mouse_rel=pygame.mouse.get_rel()
         self.mouse_down=pygame.mouse.get_pressed()
