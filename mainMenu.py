@@ -35,6 +35,9 @@ def mainMenu(screen):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F7:
                     globalState.debugMode = not globalState.debugMode
+                elif event.key == pygame.K_F9:
+                    combat.combat(screen)
+                    exit();
 
         # Draw buttons with hover effect
         if host_button_rect.collidepoint(mouse_pos):
