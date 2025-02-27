@@ -1,6 +1,7 @@
 # import combat
 import combat
 import globalState
+import socket
 import pygame, logging, time, useful_stuff
 from networking import Networking
 
@@ -76,13 +77,15 @@ def startHostingGame(screen):
     text_background_rect = pygame.Rect((screen_width - 320) // 2, 240, 320, 100)
 
     waiting_text = useful_stuff.render_text("Waiting for connection...", 22, (255, 255, 255), "arial")
-    ip_text = useful_stuff.render_text(f"IP: {globalState.networkManager.socket.getsockname()[0]}:{globalState.networkManager.socket.getsockname()[1]}", 22, (255, 255, 255), "arial")
+    ip_text = useful_stuff.render_text(f"IP: <Your IP>:{globalState.networkManager.socket.getsockname()[1]}", 22, (255, 255, 255), "arial")
 
     back_button_rect = pygame.Rect((screen_width - 200) // 2, 350, 200, 50)
     back_button_text = useful_stuff.render_text("Back", 22, (255, 255, 255), "arial")
     
     while True:
         screen.blit(scaled_background_texture, (0, 0))
+
+        waiting_text = useful_stuff.render_text(f"Waiting for connection{('.' * ((pygame.time.get_ticks() // 500) % 4))}", 22, (255, 255, 255), "arial")
 
         if globalState.networkManager.isConnected:
             startGame(screen)
@@ -102,7 +105,7 @@ def startHostingGame(screen):
                     return
 
         pygame.draw.rect(screen, (64,64, 64), text_background_rect, border_radius=5)
-        screen.blit(waiting_text, (screen_width // 2 - 100, 250))
+        screen.blit(waiting_text, (screen_width // 2 - 115, 250))
         screen.blit(ip_text, (screen_width // 2 - 100, 300))
 
         if back_button_rect.collidepoint(pygame.mouse.get_pos()):
@@ -199,19 +202,5 @@ def joinGame(screen):
         pygame.display.update()
         globalState.clock.tick(60)
 
-def idk123(data):
-    print("yay:", data)
-
 def startGame(screen):
-    if globalState.networkManager.isServer:
-        globalState.networkManager.broadcastEvent("testEvent", {"hey": "hello"})
-    else:
-        globalState.networkManager.onEvent("testEvent", idk123)
-        while(1):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-            
-            globalState.networkManager.handleEvents()
-    # combat.combat(screen)
+    combat.combat(screen)

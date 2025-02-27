@@ -1,13 +1,17 @@
 import board
 import pygame
 import json
+from chat import Chat
 import random 
 import math
+
+import globalState
 
 with open("./Resources/decks.json","r") as read_file:
     default_deck_1=json.loads(read_file.read())["Warrior"]
 
 def combat(surface):
+    pygame.mouse.set_visible(False)
     combat_menu_is_running=True
     screen_width = surface.get_width()
     screen_height = surface.get_height()
@@ -26,14 +30,18 @@ def combat(surface):
     for i in range(5):
         _board.draw_a_card()
 
+    if globalState.networkManager != None:
+        chat = Chat()
+
     clock=pygame.time.Clock()
     while combat_menu_is_running:
-
         dt=clock.tick()
         if dt==0:
             dt=10
         dt=10/dt
         for event in pygame.event.get():
+            if globalState.networkManager:
+                chat.handle_event(event)
             if event.type==pygame.QUIT:
                 combat_menu_is_running=False
             if event.type==pygame.MOUSEBUTTONDOWN:
@@ -46,5 +54,10 @@ def combat(surface):
         _board.update()
         _board.draw(dt)
         surface.blit(pygame.transform.scale(_board.surface,(screen_width,screen_height)),(0,0))
+        
+        if globalState.networkManager:
+            chat.draw(surface)
+            globalState.networkManager.handle_events()
+
         pygame.display.flip()
 #combat(screen)
