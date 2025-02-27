@@ -2,7 +2,17 @@ from card import *
 import creature
 import spell
 import sys
+import logging
 import os
+
+cardSideImages={}
+
+def loadCardImages(path="./Resources/images/cards/"): # must have slash at the end
+    for name in os.listdir(path):
+        with open(os.path.join(path, name)) as f:
+            logging.DEBUG(f"loaded {name}")
+            cardSideImages[name.split(".")[:-1]] = pygame.image.load(path + name)
+
 class Board:
     def __init__(self,inherited_screen_size=(1920,1080)):
         self.locations={  #Contains all the data about where cards can exist
@@ -22,6 +32,8 @@ class Board:
         self.click=[False,False,False] #Can accurately detect the first frame when the mouse button is clicked
         self.game_over=False
         self.open_GUIs={}
+
+        loadCardImages()
 
         self.frame=0
         self.tech={} #Current Effects happening on board
