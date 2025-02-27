@@ -5,7 +5,7 @@ from mainMenu import mainMenu
 pygame.init()
 
 # Set up the display
-screen = pygame.display.set_mode((0, 0))
+screen = pygame.display.set_mode((1080 , 720))
 pygame.display.set_caption("Through the Obelisk")
 
 logging.basicConfig(level=logging.INFO, 

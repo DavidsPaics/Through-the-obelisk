@@ -3,8 +3,7 @@ import pygame
 import json
 import random 
 import math
-pygame.init()
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+
 with open("./Resources/decks.json","r") as read_file:
     default_deck_1=json.loads(read_file.read())["Warrior"]
 def combat(surface):
@@ -30,6 +29,5 @@ def combat(surface):
                 combat_menu_is_running=False
         surface.fill((0,0,0))
         _board.update()
-        _board.draw(screen,dt)
+        _board.draw(surface,dt)
         pygame.display.update()
-combat(screen)

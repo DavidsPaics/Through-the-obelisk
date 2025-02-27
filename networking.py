@@ -1,11 +1,12 @@
 import socket
 import logging
 import json
+import globalState
 
 validTypes = ["hello"]
 
 class Networking:
-    def __init__(self, isServer: bool, ip: str = None, port: int = 6969):
+    def __init__(self, isServer: bool, ip: str = None, port: int = globalState.port):
         self.isServer = isServer
         self.isConnected = False
         self.client_socket = None
@@ -17,7 +18,7 @@ class Networking:
         else:
             self.socket.connect((ip, port))
             logging.info(f"Connected to server at {ip}:{port}")
-            self.socket.send(json.dumps({"type": "hello"}).encode())
+            # self.socket.send(json.dumps({"type": "hello"}).encode())
             self.isConnected = True  # Set isConnected to True for the client
         self.socket.setblocking(False)
 
