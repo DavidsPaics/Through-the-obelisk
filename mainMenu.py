@@ -29,9 +29,10 @@ def mainMenu(screen):
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if host_button_rect.collidepoint(event.pos):
                     startHostingGame(screen)
-                    exit()
+                    globalState.networkManager.close()
                 if join_button_rect.collidepoint(event.pos):
                     joinGame(screen)
+                    globalState.networkManager.close()
                     # Add functionality for hosting game here
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F7:
@@ -77,6 +78,8 @@ def startHostingGame(screen):
     waiting_text = useful_stuff.render_text("Waiting for connection...", 22, (255, 255, 255), "arial")
     ip_text = useful_stuff.render_text(f"IP: {globalState.networkManager.socket.getsockname()[0]}:{globalState.networkManager.socket.getsockname()[1]}", 22, (255, 255, 255), "arial")
 
+    back_button_rect = pygame.Rect((screen_width - 200) // 2, 350, 200, 50)
+    back_button_text = useful_stuff.render_text("Back", 22, (255, 255, 255), "arial")
     
     while True:
         screen.blit(scaled_background_texture, (0, 0))
@@ -94,10 +97,20 @@ def startHostingGame(screen):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_F7:
                     globalState.debugMode = not globalState.debugMode
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if back_button_rect.collidepoint(event.pos):
+                    return
 
         pygame.draw.rect(screen, (64,64, 64), text_background_rect, border_radius=5)
         screen.blit(waiting_text, (screen_width // 2 - 100, 250))
         screen.blit(ip_text, (screen_width // 2 - 100, 300))
+
+        if back_button_rect.collidepoint(pygame.mouse.get_pos()):
+            pygame.draw.rect(screen, (100, 0, 0), back_button_rect, border_radius=5)
+        else:
+            pygame.draw.rect(screen, (139, 0, 0), back_button_rect, border_radius=5)
+        
+        screen.blit(back_button_text, (back_button_rect.x + 75, back_button_rect.y + 11))
 
         if globalState.debugMode:
             useful_stuff.draw_fps_counter(screen, globalState.clock)
@@ -120,6 +133,9 @@ def joinGame(screen):
     input_text = ''
     active = False
     shit = False
+
+    back_button_rect = pygame.Rect((screen_width - 200) // 2, 380, 200, 50)
+    back_button_text = useful_stuff.render_text("Back", 22, (255, 255, 255), "arial")
 
     while True:
         if len(input_text) > 0 or active == False:
@@ -158,6 +174,9 @@ def joinGame(screen):
                 else:
                     active = False
 
+                if back_button_rect.collidepoint(event.pos):
+                    return
+
         pygame.draw.rect(screen, (64, 64, 64), text_background_rect, border_radius=5)
         screen.blit(join_text, (screen_width // 2 - 100, 250))
 
@@ -166,6 +185,13 @@ def joinGame(screen):
         txt_surface = useful_stuff.render_text(input_text, 22, (255, 255, 255), "arial")
         screen.blit(txt_surface, (input_box.x + 5, input_box.y + 15))
         pygame.draw.rect(screen, (255, 128, 128) if shit else ((200, 200, 200) if not active else (255, 255, 255)), input_box, 3, border_radius=5)
+
+        if back_button_rect.collidepoint(pygame.mouse.get_pos()):
+            pygame.draw.rect(screen, (100, 0, 0), back_button_rect, border_radius=5)
+        else:
+            pygame.draw.rect(screen, (139, 0, 0), back_button_rect, border_radius=5)
+        
+        screen.blit(back_button_text, (back_button_rect.x + 75, back_button_rect.y + 11))
 
         if globalState.debugMode:
             useful_stuff.draw_fps_counter(screen, globalState.clock)

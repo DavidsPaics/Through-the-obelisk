@@ -33,6 +33,12 @@ class Networking:
         else:
             logging.error("try_accept_connection called on a client instance")
             return None, None
+    
+    def close(self):
+        if self.isServer and self.client_socket:
+            self.client_socket.close()
+        self.socket.close()
+        self.isConnected = False
 
     def receive(self):
         if not self.isConnected:
