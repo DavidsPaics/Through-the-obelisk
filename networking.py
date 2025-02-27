@@ -1,9 +1,8 @@
 import socket
 import logging
+import time
 import json
 import globalState
-
-validTypes = ["hello"]
 
 class Networking:
     def __init__(self, isServer: bool, ip: str = None, port: int = globalState.port):
@@ -43,9 +42,47 @@ class Networking:
                 data = json.loads(self.client_socket.recv(1024).decode())  # Use client_socket for server
             else:
                 data = json.loads(self.socket.recv(1024).decode())  # Use socket for client
-            if data["type"] not in validTypes:
-                logging.error(f"Invalid message type: {data['type']}")
-                return None
             return data
-        except BlockingIOError:
+        except:
             return None
+    
+    def send(self, data: dict):
+        if not self.isConnected:
+            return
+        try:
+            if self.isServer and self.client_socket:
+                self.client_socket.send(json.dumps(data).encode())  # Use client_socket for server
+            else:
+                self.socket.send(json.dumps(data).encode())  # Use socket for client
+        except BlockingIOError:
+            return
+    
+    def broadcastEvent(self, name: str, data: dict):
+        if not self.isConnected:
+            logging.error("Broadcast failed: Not connected")
+            return
+        try:
+            if self.isServer:
+                self.client_socket.send(json.dumps({"type": "event", "name": name, "data": data}).encode())  # Use client_socket for server
+            else:
+                self.socket.send(json.dumps({"type": "event", "name": name, "data": data}).encode())  # Use socket for client
+        except BlockingIOError:
+            return
+    
+    eventCallbacks = {}
+    def onEvent(self, name: str, callback):
+        if name not in self.eventCallbacks:
+            self.eventCallbacks[name] = set([callback])
+        else:
+            self.eventCallbacks[name].add(callback)
+    
+    def handleEvents(self):
+        if not self.isConnected:
+            return
+        data = self.receive()
+        if data is None:
+            return
+        if data["type"] == "event":
+            for callback in self.eventCallbacks.get(data["name"], []):
+                callback(data["data"])
+    

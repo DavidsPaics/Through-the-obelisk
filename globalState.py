@@ -1,4 +1,4 @@
-import pygame, networking
+import pygame
 
 # tālāk konfigurācija
 
@@ -10,4 +10,3 @@ debugMode = False
 # sis nav labi
 clock = pygame.time.Clock()
 
-networkThingy = None

@@ -62,7 +62,7 @@ def mainMenu(screen):
 def startHostingGame(screen):
     scaled_background_texture = pygame.transform.scale(background_texture, screen.get_size())
 
-    globalState.networking = Networking(True)
+    globalState.networkManager = Networking(True)
     
     # Define button properties
     screen_width = screen.get_width()
@@ -72,17 +72,17 @@ def startHostingGame(screen):
     text_background_rect = pygame.Rect((screen_width - 320) // 2, 240, 320, 100)
 
     waiting_text = useful_stuff.render_text("Waiting for connection...", 22, (255, 255, 255), "arial")
-    ip_text = useful_stuff.render_text(f"IP: {globalState.networking.socket.getsockname()[0]}:{globalState.networking.socket.getsockname()[1]}", 22, (255, 255, 255), "arial")
+    ip_text = useful_stuff.render_text(f"IP: {globalState.networkManager.socket.getsockname()[0]}:{globalState.networkManager.socket.getsockname()[1]}", 22, (255, 255, 255), "arial")
 
     
     while True:
         screen.blit(scaled_background_texture, (0, 0))
 
-        if globalState.networking.isConnected:
+        if globalState.networkManager.isConnected:
             startGame(screen)
             return
         
-        globalState.networking.try_accept_connection()
+        globalState.networkManager.try_accept_connection()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -138,7 +138,7 @@ def joinGame(screen):
                             shit = True
                         else:
                             ip, port = input_text.split(":")
-                            globalState.networking = Networking(False, ip, int(port))
+                            globalState.networkManager = Networking(False, ip, int(port))
                             startGame(screen)
                             exit()
 
@@ -170,6 +170,19 @@ def joinGame(screen):
         pygame.display.update()
         globalState.clock.tick(60)
 
+def idk123(data):
+    print("yay:", data)
 
 def startGame(screen):
-    combat.combat(screen)
+    if globalState.networkManager.isServer:
+        globalState.networkManager.broadcastEvent("testEvent", {"hey": "hello"})
+    else:
+        globalState.networkManager.onEvent("testEvent", idk123)
+        while(1):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+            
+            globalState.networkManager.handleEvents()
+    # combat.combat(screen)
