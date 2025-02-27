@@ -199,19 +199,5 @@ def joinGame(screen):
         pygame.display.update()
         globalState.clock.tick(60)
 
-def idk123(data):
-    print("yay:", data)
-
 def startGame(screen):
-    if globalState.networkManager.isServer:
-        globalState.networkManager.broadcastEvent("testEvent", {"hey": "hello"})
-    else:
-        globalState.networkManager.onEvent("testEvent", idk123)
-        while(1):
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-            
-            globalState.networkManager.handleEvents()
-    # combat.combat(screen)
+    combat.combat(screen)

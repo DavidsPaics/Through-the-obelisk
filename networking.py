@@ -11,7 +11,14 @@ class Networking:
         self.client_socket = None
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if isServer:
-            self.socket.bind(("0.0.0.0", port))
+            while True:
+                try:
+                    self.socket.bind(("0.0.0.0", port))
+                    break
+                except OSError:
+                    logging.error(f"Port {port} is already in use")
+                    port += 1
+                    logging.info(f"Trying port {port} instead")
             self.socket.listen(5)
             logging.info(f"Server listening on port {port}, ip: {self.socket.getsockname()[0]}")
         else:
@@ -82,7 +89,7 @@ class Networking:
         else:
             self.eventCallbacks[name].add(callback)
     
-    def handleEvents(self):
+    def handle_events(self):
         if not self.isConnected:
             return
         data = self.receive()
