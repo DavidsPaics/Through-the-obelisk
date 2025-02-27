@@ -22,10 +22,10 @@ class Creature:
                 cached_sprite_pictures[i["Sprite Path"]]=pygame.image.load(i["Sprite Path"])
             self.sprite.append(i.copy())
         
-    def draw(self,delta):
+    def draw(self,delta=1):
         if self.card!=None:
             #Currently only front is functional
-            self.card.sides["Front"].fill((12,23,34))
+            self.card.sides[self.card.data["Side On Top"]].fill((card_transparency_color))
             for i in self.sprite:
                 x_position=i["X Center"]+105
                 y_position=i["Y Center"]+160
@@ -40,5 +40,7 @@ class Creature:
                     i["Y Fi"]+=i["Omega"]/delta
                     y_position+=sin(i["Y Fi"])*i["Y Movement"]
                 if self.card.sides[self.card.data["Side On Top"]]==i["Side"]:
+                    print(cached_sprite_pictures)
                     center(cached_sprite_pictures[i["Sprite Path"]],self.card.sides[i["Side"]],x_position,y_position)
-           
+                else:
+                    pass

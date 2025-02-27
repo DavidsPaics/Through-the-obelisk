@@ -2,8 +2,19 @@ from random import *
 from math import *
 import pygame
 import colorsys
+import sys
+import logging
+import os
 from useful_stuff import *
 pygame.init()
+
+cardSideImages={}
+
+def loadCardImages(path="./Resources/images/cards/"): # must have slash at the end
+    for name in os.listdir(path):
+        with open(os.path.join(path, name)) as f:
+            logging.debug(f"loaded {name}")
+            cardSideImages[''.join(name.split(".")[:-1])] = pygame.transform.scale(pygame.image.load(path + name), (210, 320))
 
 
 class Card:
@@ -38,8 +49,8 @@ class Card:
             "Vertical Flip":flip_vertically
         })
     def draw(self,delta=1): #Updates the card sprite, it is recommended this is ran every frame
-        #if self.parent!=None: #Draws the cards parent first
-        #    self.parent.draw()
+        if self.parent!=None: #Draws the cards parent first
+            self.parent.draw(delta)
         if self.vector_space_element.set_up:
             self.x=self.vector_space_element.x
             self.y=self.vector_space_element.y

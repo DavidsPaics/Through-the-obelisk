@@ -13,5 +13,5 @@ class Spell:
         self.id=id #Will use this later, just needed for board things rn
         self.data=spell_data[self.id].copy()
         self.type="Spell"
-    def draw(self):
+    def draw(self,delta=1):
         pass
