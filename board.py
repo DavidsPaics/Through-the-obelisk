@@ -67,7 +67,7 @@ class Board:
         self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         #Draws the board at the very bottom
           
-        
+        pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,10)
              
         #Draws all the block positions and the blocks themselves
         hand_locked=False #Flag which determines if cards can be played from hand, useful for coop operations
