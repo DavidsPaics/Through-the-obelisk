@@ -79,7 +79,7 @@ class Networking:
                 self.client_socket.send(json.dumps({"type": "event", "name": name, "data": data}).encode())  # Use client_socket for server
             else:
                 self.socket.send(json.dumps({"type": "event", "name": name, "data": data}).encode())  # Use socket for client
-        except BlockingIOError:
+        except:
             return
     
     eventCallbacks = {}
