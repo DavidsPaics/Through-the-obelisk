@@ -130,7 +130,7 @@ class Board:
                     #center(render_text((round(iterated_card.vector_space_element.x),round(iterated_card.vector_space_element.y)),30,(255,0,0)),self.surface,iterated_card.vector_space_element.x-self.camera_x,iterated_card.vector_space_element.y-self.camera_y)
                     #The line above is used in debug to determine card positions
                     
-                    if self.mouse_down[0]:
+                    if self.click[0]:
                         self.locations["Hand"]["Original Card Pos"]=(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
                         self.locations["Hand"]["Selected Card"]=iterated_card
                         self.locations["Hand"]["Selected Card Original Position"]=(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
@@ -141,7 +141,9 @@ class Board:
                         
                         if self.selected_card.parent.type=="Spell": #Basically every single card in the game
                             if not self.mouse_down[0]:
-                                if dist(self.locations["Hand"]["Original Card Pos"],(self.selected_card.vector_space_element.x,self.selected_card.vector_space_element.y))<140:
+                                t=dist(self.locations["Hand"]["Original Card Pos"],(self.selected_card.vector_space_element.x,self.selected_card.vector_space_element.y))
+                                print(t)
+                                if t>140:
                                     
                                     self.play_a_card(self.selected_card.parent)
                                     self.locations["Graveyard"]["Cards"].append(self.selected_card)

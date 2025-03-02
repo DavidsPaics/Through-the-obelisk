@@ -29,14 +29,14 @@ class Creature:
             for i in self.sprite:
                 x_position=i["X Center"]+105
                 y_position=i["Y Center"]+160
-                if "Fi" in self.sprite:
-                    i["Fi"]+=i["Omega"]/delta
+                if "Fi" in i:
+                    i["Fi"]+=i["Omega"]*delta
                     x_position+=cos(i["Fi"])*i["X Movement"]
                     y_position+=sin(i["Fi"])*i["Y Movement"]
-                if "X Fi" in self.sprite:
+                if "X Fi" in i:
                     i["X Fi"]+=i["Omega"]/delta
                     x_position+=cos(i["Fi"])*i["X Movement"]
-                if "Y Fi" in self.sprite:
+                if "Y Fi" in i:
                     i["Y Fi"]+=i["Omega"]/delta
                     y_position+=sin(i["Y Fi"])*i["Y Movement"]
                 if self.card.data["Side On Top"]==i["Side"]:

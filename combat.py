@@ -36,10 +36,11 @@ def combat(surface):
 
     #clock=pygame.time.Clock()
     while combat_menu_is_running:
-        dt=globalState.clock.tick()
+        globalState.clock.tick()
+        dt=globalState.clock.get_fps()
         if dt==0:
-            dt=10
-        dt=10/dt
+            dt=1
+        dt=60/dt
         for event in pygame.event.get():
             if globalState.networkManager:
                 chat.handle_event(event)
@@ -59,7 +60,7 @@ def combat(surface):
 
         if globalState.debugMode:
             useful_stuff.draw_fps_counter(surface, globalState.clock)
-        
+            surface.blit(useful_stuff.render_text(f"dt:  {round(dt,2)}",30,(255,255,0),"comicsansms"),(0,30))
         if globalState.networkManager:
             chat.draw(surface)
             globalState.networkManager.handle_events()
