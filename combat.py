@@ -1,4 +1,4 @@
-import board
+import Engine.board
 import pygame
 import json
 from chat import Chat
@@ -16,7 +16,7 @@ def combat(surface):
     combat_menu_is_running=True
     screen_width = surface.get_width()
     screen_height = surface.get_height()
-    _board=board.Board((screen_width,screen_height))
+    _board=Engine.board.Board((screen_width,screen_height))
     _board.setup_card_pile("Deck",(1867,1000),(105,160))
     _board.setup_card_pile("Graveyard",(53,1000),(105,160))
     _board.setup_hand()

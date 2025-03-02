@@ -1,6 +1,6 @@
-from card import *
-import creature
-import spell
+from Engine.card import *
+import Engine.creature as creature
+import Engine.spell as spell
 import sys
 import logging
 import os
