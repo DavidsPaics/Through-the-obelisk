@@ -16,7 +16,6 @@ def loadCardImages(path="./Resources/images/cards/"): # must have slash at the e
             logging.debug(f"loaded {name}")
             cardSideImages[''.join(name.split(".")[:-1])] = pygame.transform.scale(pygame.image.load(path + name), (210, 320))
 
-
 class Card:
     def __init__(self): #Will be called when a new card is created
         self.sides={}
@@ -33,8 +32,7 @@ class Card:
             #Used to determine card flipping
             "Side Order In Flipping":["Front","Back"], #Standart side order, can be changed if needed. 
             "Current Side Flipped":0,
-            "Side On Top":"Front",
-            "Type":"None"
+            "Side On Top":"Front"
         }
         self.vector_space_element=Vector_Element()
     def flip(self,frames=1,flip_to_side=None,flip_vertically=False):

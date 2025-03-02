@@ -22,13 +22,14 @@ class Board:
         self.drag_screen_allowed=True #Sets whether or not if you drag something, it will be dragged across the screen
         self.mouse_down=[False for i in range(3)]
         self.ctimer=[0,0,0]
+        self.mcctimer=0
         self.click=[False,False,False] #Can accurately detect the first frame when the mouse button is clicked
         self.game_over=False
         self.open_GUIs={}
 
         loadCardImages()
 
-        self.frame=0
+        self.time_passed=0
         self.tech={} #Current Effects happening on board
     
         self.hand=None
@@ -42,7 +43,7 @@ class Board:
         #The fuck are these things? Why would someone multiply the camera pos by something? i'm keeping this as a fun artifact. 
         #self.camera_x*=1.01
         #self.camera_y*=1.01
-        self.frame+=1
+        self.time_passed+=delta
         self.drag_screen_allowed=False
         self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
         
@@ -51,14 +52,37 @@ class Board:
             #logging.info(i)
             #pygame.image.save(i["Card"].sprite,"test.png")
             center(i["Card"].sprite,self.surface,i["Position"][0],i["Position"][1])
-        pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,10)
-
-        hand_locked=False #Flag which determines if cards can be played from hand, useful for coop operations
+        
         for iterated_card_pile in self.card_piles: #Draws the top card of every card pile
             self.card_piles[iterated_card_pile].draw(self.surface)
         if self.hand!=None:
             self.hand.draw(self,delta=delta)
-    def update(self): #Updates the board so that 
+        
+        #cooler cursor
+        mc_size=10-(min(self.mcctimer/6,1)/1)**2*8 #adding a smooth easing motion for more fun
+        #pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,mc_size+3,2)
+        for i in range(6):
+            pygame.draw.polygon(self.surface,(255,255,255),[
+            (
+                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i)*mc_size,
+                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i)*mc_size,
+            ),
+            (
+                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i+pi/20)*(mc_size+5),
+                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i+pi/20)*(mc_size+5),
+            ),
+            (
+                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i)*(mc_size+10),
+                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i)*(mc_size+10),
+            ),
+            (
+                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i-pi/20)*(mc_size+5),
+                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i-pi/20)*(mc_size+5),
+            )
+            
+            ])
+        
+    def update(self,delta): #Updates the board so that 
         self.mouse_rel=pygame.mouse.get_rel()
         self.mouse_down=pygame.mouse.get_pressed()
         self.mouse_pos=pygame.mouse.get_pos()
@@ -69,6 +93,13 @@ class Board:
             self.camera_y-=self.mouse_rel[1]
         self.ctimer=[(self.ctimer[i]+1)*self.mouse_down[i] for i in range(3)]
         self.click=[self.ctimer[i]==1 for i in range(3)]
+        if self.mouse_down[0]:
+            self.mcctimer=min(6,self.mcctimer+delta)
+        else:
+            if self.mcctimer>0:
+                self.mcctimer-=delta
+            else:
+                self.mcctimer=0
     def add_card_to_game(self,plain_card_id,plain_card_type="Creature"): #Adds a new card to the game, returns the created card
         new_card=Card() 
 

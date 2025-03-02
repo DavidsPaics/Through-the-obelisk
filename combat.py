@@ -54,7 +54,7 @@ def combat(surface):
                 if event.key == pygame.K_F7:
                     globalState.debugMode = not globalState.debugMode
                 
-        _board.update()
+        _board.update(dt)
         _board.draw(dt)
         surface.blit(pygame.transform.scale(_board.surface,(screen_width,screen_height)),(0,0))
 
