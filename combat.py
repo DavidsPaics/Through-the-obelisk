@@ -17,10 +17,10 @@ def combat(surface):
     screen_width = surface.get_width()
     screen_height = surface.get_height()
     _board=board.Board((screen_width,screen_height))
-    _board.setup_card_pile("Deck",(1920,1080))
-    _board.setup_card_pile("Graveyard",(0,1080))
+    _board.setup_card_pile("Deck",(1867,1000),(105,160))
+    _board.setup_card_pile("Graveyard",(53,1000),(105,160))
     _board.setup_hand()
-    _board.locations["Hand"]["Position"]=[960,900]
+    _board.hand.pos=[960,900]
     _board.import_deck(default_deck_1)
     pcard_1=_board.add_card_to_game("Warrior","Creature")
 

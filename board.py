@@ -4,14 +4,14 @@ import spell
 import sys
 import logging
 import os
-
+import Engine.pile
 class Board:
     def __init__(self,inherited_screen_size=(1920,1080)):
         self.locations={  #Contains all the data about where cards can exist
             "Board":[],
             "OnTable":[]
         }
-        self.card_piles=[]
+        self.card_piles={} #Stored as a dict so that you can get a card pile by its name
         self.surface=pygame.Surface((1920,1080))
         self.camera_x=0
         self.camera_y=0 #Puts the camera about right
@@ -31,154 +31,33 @@ class Board:
         self.frame=0
         self.tech={} #Current Effects happening on board
     
-
+        self.hand=None
     def setup_hand(self,max_cards=10):
-        self.locations["Hand"]={
-            "Position":[0,500], #Can be changed later if needed
-            "Max Cards":max_cards,
-            "Cards":[],
-            "Curvature Settings":{ #Defines some stuff about how cards are held in hand, It's best not to think about this that much right now
-                "Alpha":10, #How much the cards are bent
-                "Beta":1.5, #Exponential of how far down the cards go, it's best to be kept small at larger number of cards
-                "Gamma":10 #Card Descent Multiplier in pixels
-            },
-            "Card Rendered On Top":None,
-            "Selected Card":None,
-            "Original Card Pos":None, #Used to determine whether or not a spell is played from hand
-        }
-    def setup_card_pile(self,card_pile_name="Deck",pos=(900,0)):
-        self.locations[card_pile_name]={
-            "Position":pos,
-            "Cards":[]
-        }
-        self.card_piles.append(card_pile_name)
+        self.hand=Engine.pile.Hand((0,500),max_cards)
+    def setup_card_pile(self,card_pile_name="Deck",pos=(900,0),custom_size=(210,320)):
+        self.card_piles[card_pile_name]=Engine.pile.Pile(card_pile_name,pos,custom_size=custom_size)
+        #self.card_piles.append(card_pile_name)
     def draw(self,delta=1):
+
+        #The fuck are these things? Why would someone multiply the camera pos by something? i'm keeping this as a fun artifact. 
         #self.camera_x*=1.01
         #self.camera_y*=1.01
         self.frame+=1
         self.drag_screen_allowed=False
         self.surface.fill((25,5,5)) #Fills the board with a nice color to draw on
-        #Draws the board at the very bottom
+        
         for i in self.locations["OnTable"]:
             i["Card"].draw(delta=delta)
             #logging.info(i)
             #pygame.image.save(i["Card"].sprite,"test.png")
             center(i["Card"].sprite,self.surface,i["Position"][0],i["Position"][1])
         pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,10)
-             
-        #Draws all the block positions and the blocks themselves
+
         hand_locked=False #Flag which determines if cards can be played from hand, useful for coop operations
         for iterated_card_pile in self.card_piles: #Draws the top card of every card pile
-            selected_card_pile=self.locations[iterated_card_pile]
-            cards_in_pile=len(selected_card_pile["Cards"])
-            if cards_in_pile>0:
-                selected_card_pile["Cards"][-1].draw()
-                center(selected_card_pile["Cards"][-1].sprite,self.surface,selected_card_pile["Position"][0]-self.camera_x,selected_card_pile["Position"][1]-self.camera_y)                
-        if "Hand" in self.locations:
-           # self.locations["Hand"]["Position"]=[self.camera_x+surface.get_width()/2,self.camera_y+surface.get_height()/2+500]
-            self.cards_in_hand=len(self.locations["Hand"]["Cards"])
-            if self.cards_in_hand>0:
-                curvature_settings=self.locations["Hand"]["Curvature Settings"]
-                card_distance_from_mouse={}
-                for I,iterated_card in enumerate(self.locations["Hand"]["Cards"]):
-                    #print(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
-                    if not iterated_card in [self.locations["Hand"]["Selected Card"],self.locations["Hand"]["Card Rendered On Top"]]:
-                        central_offset=-(self.cards_in_hand-1)/2+I #Used to calculate rotation
-                        iterated_card.draw(delta=delta)
-                        destination_x=self.locations["Hand"]["Position"][0]-((self.cards_in_hand-1)/2-I)*170 #Determines card position in hand
-                        destination_y=self.locations["Hand"]["Position"][1]+abs(central_offset)**curvature_settings["Beta"]*curvature_settings["Gamma"] #This is where the schizophrenia starts. I'll forget how this works once i look away, so i must not look away.
-                        rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
-                        if not iterated_card.vector_space_element.set_up:
-                            iterated_card.vector_space_element.setup(destination_x,destination_y)
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75,rotation,delta)
-                        #print(iterated_card.sprite)
-                        center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
-                            iterated_card.vector_space_element.y-self.camera_y)
-                        #center(render_text((round(iterated_card.vector_space_element.x),round(iterated_card.vector_space_element.y)),30,(255,0,0)),self.surface,iterated_card.vector_space_element.x-self.camera_x,iterated_card.vector_space_element.y-self.camera_y)
-                        #The line above is used in debug to determine card positions
-                    elif iterated_card==self.locations["Hand"]["Card Rendered On Top"]:
-                        saved_I=I
-                    
-                    dist_from_mouse=dist((iterated_card.vector_space_element.x,iterated_card.vector_space_element.y),self.mouse_pos)
-                    while dist_from_mouse in card_distance_from_mouse: #Ensures all the elements are of unique distance to the mouse position
-                        dist_from_mouse+=0.000001
-                    card_distance_from_mouse[dist_from_mouse]=iterated_card #Sets up detection of which card is selected
-                    #if dist_from_mouse<192: #If is within a circle of the mouse cursor
-                    #    self.drag_screen_allowed=False #You can't drag the screen
-                if self.locations["Hand"]["Card Rendered On Top"]!=None: #Brings the topmost rendered card to the very end of the loop, ensuring it is rendered last
-                    I=saved_I
-                    iterated_card=self.locations["Hand"]["Card Rendered On Top"]
-                    central_offset=-(self.cards_in_hand-1)/2+I
-                    iterated_card.draw(delta=delta)
-                    destination_x=self.locations["Hand"]["Position"][0]-((self.cards_in_hand-1)/2-I)*170 #Determines card position in hand
-                    destination_y=self.locations["Hand"]["Position"][1]+abs(central_offset)**curvature_settings["Beta"]*curvature_settings["Gamma"] #This is where the schizophrenia starts. I'll forget how this works once i look away, so i must not look away.
-                    rotation=curvature_settings["Alpha"]*((self.cards_in_hand-1)/2-I)/((self.locations["Hand"]["Max Cards"]-1)/2)
-                    
-                    if not iterated_card.vector_space_element.set_up:
-                        iterated_card.vector_space_element.setup(destination_x,destination_y)
-                    if iterated_card!=self.locations["Hand"]["Selected Card"]:
-                        iterated_card.vector_space_element.move_with_easing_motion_to(destination_x,destination_y,75,rotation,delta)
-                        center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
-                            iterated_card.vector_space_element.y-self.camera_y)
-                    else:
-                        center(pygame.transform.rotate(iterated_card.sprite,iterated_card.vector_space_element.rotation),
-                            self.surface,iterated_card.vector_space_element.x-self.camera_x,
-                            iterated_card.vector_space_element.y-self.camera_y)
-                    
-                    #center(render_text((round(iterated_card.vector_space_element.x),round(iterated_card.vector_space_element.y)),30,(255,0,0)),self.surface,iterated_card.vector_space_element.x-self.camera_x,iterated_card.vector_space_element.y-self.camera_y)
-                    #The line above is used in debug to determine card positions
-                    
-                    if self.click[0]:
-                        self.locations["Hand"]["Original Card Pos"]=(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
-                        self.locations["Hand"]["Selected Card"]=iterated_card
-                        self.locations["Hand"]["Selected Card Original Position"]=(iterated_card.vector_space_element.x,iterated_card.vector_space_element.y)
-                if len(self.open_GUIs)==0: #If there are any other GUIs, cards cannot be interacted with
-                    if self.locations["Hand"]["Selected Card"]!=None:
-                        self.selected_card=self.locations["Hand"]["Selected Card"]
-                        self.selected_card.vector_space_element.move_with_easing_motion_to(self.mouse_pos[0],self.mouse_pos[1],4,0,delta)
-                        
-                        if self.selected_card.parent.type=="Spell": #Basically every single card in the game
-                            if not self.mouse_down[0]:
-                                t=dist(self.locations["Hand"]["Original Card Pos"],(self.selected_card.vector_space_element.x,self.selected_card.vector_space_element.y))
-                                print(t)
-                                if t>140:
-                                    
-                                    self.play_a_card(self.selected_card.parent)
-                                    self.locations["Graveyard"]["Cards"].append(self.selected_card)
-                                    self.locations["Hand"]["Cards"].remove(self.selected_card)
-                                                        
-                                self.locations["Hand"]["Selected Card"]=None
-                                self.locations["Hand"]["Card Rendered On Top"]=None
-                            else:
-                                self.drag_screen_allowed=False
-                    else:
-                        closest_card_to_mouse_distance=sorted(list(card_distance_from_mouse.keys()))[0]
-                        if closest_card_to_mouse_distance<192 or self.locations["Hand"]["Selected Card"]!=None:
-                            #self.surface.blit(render_text(closest_card_to_mouse_distance,30,(255,0,0)),(200,0))
-                            self.locations["Hand"]["Card Rendered On Top"]=card_distance_from_mouse[closest_card_to_mouse_distance]
-                            self.drag_screen_allowed=False
-                        else:
-                            self.locations["Hand"]["Card Rendered On Top"]=None
-        
-        if "Interacting With Card On Field" in self.open_GUIs:
-            interacted_card=self.open_GUIs["Interacting With Card On Field"]["Selected Card"]
-            if interacted_card.parent.type=="Creature":
-                possible_actions=["Close"]
-                #A Nice little block checking all the cases for actions that a creature can do. 
-                if interacted_card.parent.attack>0:             possible_actions.append("Attack")
-                for I,i in enumerate(possible_actions):
-                    action_center_x=960-((len(possible_actions)-1)/2-I)*200
-                    pygame.draw.rect(self.surface,(15,15,15),(action_center_x-80,820,160,60),0,10)
-                    center(render_text(i,20,(255,255,255)),self.surface,action_center_x,850)
-                    if not (abs(self.r_mouse_pos[0]-action_center_x)<80 and abs(self.r_mouse_pos[1]-835)<30): #If The mouse hovers over this button
-                        pygame.draw.rect(self.surface,(125,125,125),(action_center_x-80,820,160,60),5,10)
-                    else:
-                        pygame.draw.rect(self.surface,(175,175,125),(action_center_x-80,820,160,60),5,10) #It Gets a different color
-                        if self.click[0]:
-                            if i=="Close":
-                                del self.open_GUIs["Interacting With Card On Field"]
+            self.card_piles[iterated_card_pile].draw(self.surface)
+        if self.hand!=None:
+            self.hand.draw(self,delta=delta)
     def update(self): #Updates the board so that 
         self.mouse_rel=pygame.mouse.get_rel()
         self.mouse_down=pygame.mouse.get_pressed()
@@ -218,13 +97,12 @@ class Board:
         
 
     def draw_a_card(self,from_pile="Deck"): #Takes a card from a deck, adds it to the hand, the animation engine itself figures out how to animate that
-        if len(self.locations[from_pile]["Cards"])>0:
-            drawn_card=self.locations[from_pile]["Cards"][0]
-            self.locations[from_pile]["Cards"].pop(0)
-            if len(self.locations["Hand"]["Cards"])<self.locations["Hand"]["Max Cards"]:
-                self.locations["Hand"]["Cards"].append(drawn_card)
+        if len(self.card_piles[from_pile].cards)>0:
+            drawn_card=self.card_piles[from_pile].cards.pop(0)
+            if len(self.hand.cards)<self.hand.max_cards:
+                self.hand.cards.append(drawn_card)
                 drawn_card.vector_space_element=Vector_Element()
-                drawn_card.vector_space_element.setup(self.locations[from_pile]["Position"][0],self.locations[from_pile]["Position"][1])
+                drawn_card.vector_space_element.setup(self.card_piles[from_pile].pos[0],self.card_piles[from_pile].pos[1])
                 drawn_card.iflip("Back")
                 drawn_card.clear_animations()
                 drawn_card.flip(40,"Front")
@@ -237,17 +115,20 @@ class Board:
         # Ideal decklist should be a list consisting of cards in the following format
         # {"Name":"CARD NAME","Type":"CARD TYPE"}
         # This doesn't shuffle the deck, so it has to be done manually
-        if not to_card_pile in self.locations:
+        if not to_card_pile in self.card_piles:
             self.setup_card_pile(to_card_pile)
         for iterated_card_packed in json_deck_list:
             new_card=self.add_card_to_game(iterated_card_packed["ID"],iterated_card_packed["Type"])
             new_card.iflip("Back")
-            self.locations[to_card_pile]["Cards"].append(new_card)
+            self.card_piles[to_card_pile].cards.append(new_card)
     def shuffle_card_pile(self,card_pile="Deck"):
-        shuffle(self.locations[card_pile]["Cards"])
+        shuffle(self.card_piles[card_pile].cards)
     def check_for_target(self,locations=[]):
+        #Currently this is somehow pretty fucking useless, i'll fix it once we add proper effect building
         possible_cards=[]
-        #First finds all the cards, then removes all the ones that don't count. 
+        #First finds all the cards, then removes all the ones that don't count.
+        for iterated_card_pile in self.card_piles:
+            possible_cards.extend(self.card_piles[iterated_card_pile].cards) 
         for i in self.locations:
             if not i in ["Board"]: #Custom Card Location
                 if len(locations)>0:
