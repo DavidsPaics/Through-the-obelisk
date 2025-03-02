@@ -5,6 +5,8 @@ import sys
 import logging
 import os
 import Engine.pile
+import pygame
+from math import cos, sin, pi
 class Board:
     def __init__(self,inherited_screen_size=(1920,1080)):
         self.locations={  #Contains all the data about where cards can exist
@@ -62,26 +64,28 @@ class Board:
         mc_size=10-(min(self.mcctimer/6,1)/1)**2*8 #adding a smooth easing motion for more fun
         #pygame.draw.circle(self.surface,(255,255,255),self.mouse_pos,mc_size+3,2)
         for i in range(6):
-            pygame.draw.polygon(self.surface,(255,255,255),[
-            (
-                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i)*mc_size,
-                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i)*mc_size,
-            ),
-            (
-                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i+pi/20)*(mc_size+5),
-                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i+pi/20)*(mc_size+5),
-            ),
-            (
-                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i)*(mc_size+10),
-                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i)*(mc_size+10),
-            ),
-            (
-                self.mouse_pos[0]+cos(self.time_passed/40+2*pi/6*i-pi/20)*(mc_size+5),
-                self.mouse_pos[1]+sin(self.time_passed/40+2*pi/6*i-pi/20)*(mc_size+5),
-            )
-            
+            r = abs(cos(self.time_passed / 40 + pi / 3 * i)) * 255
+            g = 125#abs(cos(self.time_passed / 40 + pi / 3 * i)) * 255
+            b = abs(sin(self.time_passed / 40 + pi / 3 * i)) * 255
+            pygame.draw.polygon(self.surface, (r, g, b), [
+                (
+                    self.mouse_pos[0] + cos(self.time_passed / 40 + 2 * pi / 6 * i) * mc_size,
+                    self.mouse_pos[1] + sin(self.time_passed / 40 + 2 * pi / 6 * i) * mc_size,
+                ),
+                (
+                    self.mouse_pos[0] + cos(self.time_passed / 40 + 2 * pi / 6 * i + pi / 20) * (mc_size + 5),
+                    self.mouse_pos[1] + sin(self.time_passed / 40 + 2 * pi / 6 * i + pi / 20) * (mc_size + 5),
+                ),
+                (
+                    self.mouse_pos[0] + cos(self.time_passed / 40 + 2 * pi / 6 * i) * (mc_size + 10),
+                    self.mouse_pos[1] + sin(self.time_passed / 40 + 2 * pi / 6 * i) * (mc_size + 10),
+                ),
+                (
+                    self.mouse_pos[0] + cos(self.time_passed / 40 + 2 * pi / 6 * i - pi / 20) * (mc_size + 5),
+                    self.mouse_pos[1] + sin(self.time_passed / 40 + 2 * pi / 6 * i - pi / 20) * (mc_size + 5),
+                )
             ])
-        
+    
     def update(self,delta): #Updates the board so that 
         self.mouse_rel=pygame.mouse.get_rel()
         self.mouse_down=pygame.mouse.get_pressed()

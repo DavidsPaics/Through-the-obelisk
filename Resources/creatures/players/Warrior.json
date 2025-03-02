@@ -5,10 +5,10 @@
             "Sprite Path":"Resources/creatures/players/sprites/warrior.png",
             "X Center":0,
             "Y Center":0,
-            "X Movement":0,
             "Y Movement":15,
-            "Fi":0,
-            "Omega":0.15,
+            "Y Fi":0,
+            "Omega":0.05,
+
             "Side":"Front"
         }
     ]
